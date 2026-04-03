@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>See You Letter</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <script src="{{ url_for('static', filename='js/main.js')}}"></script>
+    <body>
+        <h1>新規登録フォーム</h1>
+        <form method="POST">
+            <input type="text" name="user_name" placeholder="ユーザー名" required>
+            <input type="password" name="password" placeholder="パスワード" required>
+            <input type="password" name="repassword" placeholder="パスワード(再入力)" required>
+            <input type="submit" value="新規登録">
+        </form>
+        <li><a href="/login">ログイン画面に戻る</a></li>
+    </body>
+
+</html>

@@ -1,0 +1,60 @@
+/* 全画面に適用 */
+body {
+    background-color: #F5F5F5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-size: 18px;
+    text-align: center;
+}
+
+
+
+/* ヘッダーに適用 */
+header {
+    margin: 30px;
+}
+
+
+
+/* ログイン画面、新規登録画面に適用 */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+input {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 90%;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+input[type="submit"] {
+    background-color: #00AAFF;
+    color: #FFFFFF;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+}
+
+
+
+/* ログイン画面に適用 */
+.logo {
+    background-color: #FFAE00;
+    border-radius: 30px;
+    padding: 1px 40px;
+    font-size: 2vw;
+    line-height: 1.0;
+    margin: 0;
+    color: #333;
+}
