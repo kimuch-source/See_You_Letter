@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>See You Letter</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <script src="{{ url_for('static', filename='js/main.js')}}" defer></script>
+    </head>
+    <body>
+        <div id="navArea">
+            <nav>
+                <div class="inner">
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Detail</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+                
+            <div class="toggle-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div id="mask"></div>
+
+            <main>
+                <h2>メモをリマインドするよ！！</h2>
+                <form action="/memo" method="POST" id="memoForm">
+                    <input type="text" name="content" placeholder="内容を入力">
+                    <input type="hidden" name="timer" id="timer">
+                    <button type="button" onclick="showTimerModal()">▶</button>
+                </form>
+            </main>
+            <table>
+                <thead>
+                    <tr>
+                        <th>時間</th>
+                        <th>内容</th>
+                        <th>編集</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for memo in memos %}
+                    <tr>
+                        <td>{{ memo.timer }}</td>
+                        <td>{{ memo.content }}</td>
+                        <td>
+                            <button>✏️</button>
+                            <button>🗑️</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="button" onclick="showTimerModal()">▶</button>
+    </body>
+</html>

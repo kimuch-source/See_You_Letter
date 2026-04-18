@@ -4,21 +4,23 @@
         <meta charset="UTF-8">
         <title>See You Letter</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <script src="{{ url_for('static', filename='js/main.js')}}"defer></script>
     </head>
-    <script src="{{ url_for('static', filename='js/main.js')}}"></script>
     <body>
-        <header>
-            <h2>「あとでやろう」を手紙に</h2>
-            <div class ="logo">
-                <h1>See You Letter</h1>
-            </div>
-        </header>
-        
-        <form method="POST">
-            <input type="text" name="user_name" placeholder="ユーザー名" required>
-            <input type="password" name="password" placeholder="パスワード" required>
-            <input type="submit" value="ログイン">
-        </form>
-        <li><a href="/signup">新規登録はこちら</a></li>
+        <div class="auth">
+            <header>
+                <h2>「あとでやろう」を手紙に</h2>
+                <div class ="logo">
+                    <h1>See You Letter</h1>
+                </div>
+            </header>
+            
+            <form method="POST">
+                <input type="text" name="user_name" placeholder="ユーザー名" required>
+                <input type="password" name="password" placeholder="パスワード" required>
+                <input type="submit" value="ログイン">
+            </form>
+            <li><a href="/signup">新規登録はこちら</a></li>
+        </div>
     </body>
 </html>

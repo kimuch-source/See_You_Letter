@@ -1,10 +1,13 @@
+import os
 from flask import Flask
 from flask import request, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin,LoginManager, login_user, logout_user, login_required
+from flask_login import UserMixin,LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
+from flask_migrate import Migrate
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
+
 
 load_dotenv()
 
@@ -13,16 +16,23 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URL')
 app.config['SECRET_KEY'] = os.getenv('SEACRET_KEY')
 db = SQLAlchemy()
 db.init_app(app)
+migrate = Migrate(app,db)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+#データベース設計
 class users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(30), unique=True)
     password = db.Column(db.String(255),)
-    line = db.Column(db.String(20))
+    line = db.Column(db.String(20), unique=True)
 
+class memo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    content = db.Column(db.String(255), nullable=False)
+    timer = db.Column(db.DateTime, nullable=False)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -64,6 +74,22 @@ def login():
     else:
         return render_template('auth/login.html')
     
+
+#ホーム画面
+@app.route('/')
+@login_required
+def home():
+    memos = memo.query.filter_by(user_id=current_user.id).all()
+    return render_template('home.html', memos=memos)
+
+@app.route('/memo', methods=['POST'])
+def add_memo():
+    content = request.form.get('content')
+    timer = datetime.utcnow() + timedelta(hours=1)
+    new_memo = memo(user_id=current_user.id, content=content, timer=timer)    
+    db.session.add(new_memo)
+    db.session.commit()
+    return redirect('/')
 
 
 @app.route('/logout')
