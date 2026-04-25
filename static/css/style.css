@@ -174,39 +174,41 @@ nav .inner ul li a:hover {
 
 
 
-/* タイマーモーダル */
-#timerModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 10;
+/* ── Time panel ─────────────────────────────────────────────── */
+#time-panel {
+  display: none;
+  padding: 10px;
+  background-color: #f0f8ff;
+  border: 1px solid #000;
+  margin-top: 16px;
 }
 
-#timerContent {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #FFFFFF;
-    padding: 30px;
-    border-radius: 20px;
-    text-align: center;
+.time-panel-label {
+  margin-bottom: 8px;
+  font-size: .85rem;
+  color: var(--text-muted);
 }
 
-#timerInputArea {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+.time-panel-inputs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
-#timerInputArea input {
-    width: 60px !important;
-    padding: 10px !important;
-    text-align: center;
+.time-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .85rem;
 }
+
+.time-input-group input[type="number"] {
+  width: 72px;
+}
+
+/* .remind-preview {
+  margin-top: 8px;
+  font-size: .8rem;
+  color: var(--accent);
+  font-family: var(--mono);
+} */

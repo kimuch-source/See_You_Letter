@@ -9,10 +9,24 @@ mask.onclick = () => {
     nav.classList.toggle("open");
 };
 
-function showTimerModal() {
-    let hours = prompt('何時間後に送りますか？');
-    let minutes = prompt('何分後に送りますか？');
-    let totalMinutes = (hours * 60) + parseInt(minutes);
-    document.getElementById('timer').value = totalMinutes;
-    document.getElementById('memoForm').submit();
+
+
+//時間入力パネル
+const showBtn = document.getElementById('show-btn');
+const cancellBtn = document.getElementById('cancell-btn'); 
+const panel = document.getElementById('time-panel');
+
+if (showBtn) {
+    showBtn.addEventListener('click', function(event) {
+        event.preventDefault(); // リロード防止
+        panel.style.display = 'block'; // パネルを表示
+        console.log("表示ボタンが正しく動作しました");
+    });}
+
+if (cancellBtn) {
+    cancellBtn.addEventListener('click', function(event) {
+        event.preventDefault(); // リロード防止
+        panel.style.display = 'none'; // パネルを隠す
+        console.log("キャンセルボタンが正しく動作しました");
+    });
 }
