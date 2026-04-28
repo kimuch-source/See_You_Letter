@@ -21,8 +21,7 @@ app.config['SECRET_KEY'] = os.getenv('SEACRET_KEY')
 db = SQLAlchemy()
 db.init_app(app)
 migrate = Migrate(app,db)
-with app.app_context():
-    db.create_all()
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -39,6 +38,9 @@ class memo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False,)
     content = db.Column(db.String(255), nullable=False)
     timer = db.Column(db.DateTime, nullable=False)
+
+with app.app_context():
+    db.create_all()
 
 @login_manager.user_loader
 def load_user(user_id):
