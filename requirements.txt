@@ -7,3 +7,4 @@ python-dotenv
 line-bot-sdk
 psycopg2-binary
 gunicorn
+apscheduler
