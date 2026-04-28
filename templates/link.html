@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CULetter</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <script src="{{ url_for('static', filename='js/main.js')}}" defer></script>
+    </head>
+    <body>
+        <h1>こんにちは、{{ user.name }} さん</h1>
+    
+        {% if user.line %}
+            <p style="color: green;">✅ LINE連携済みです。リマインダーが届きます。</p>
+        {% else %}
+            <p>リマインダーを受け取るには、以下のボタンから公式LINEを連携してください。</p>
+            <a href="{{ url_for('line_login', user_id=user.id) }}" 
+            style="background-color: #06C755; color: white; padding: 10px; text-decoration: none; border-radius: 5px;">
+                LINEと連携する（友だち追加）
+            </a>
+        {% endif %}
+    </body>
+</html>

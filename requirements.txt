@@ -1,0 +1,9 @@
+flask
+flask-sqlalchemy
+flask-login
+flask-migrate
+werkzeug
+python-dotenv
+line-bot-sdk
+psycopg2-binary
+gunicorn

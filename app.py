@@ -1,17 +1,19 @@
 import os
-from flask import Flask
-from flask import request, redirect, render_template
-from flask_sqlalchemy import SQLAlchemy
+import secrets
+import requests
+from flask import Flask, session, request, redirect, render_template
 from flask_login import UserMixin,LoginManager, login_user, logout_user, login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
-from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
+from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta, timezone
+from dotenv import load_dotenv
 from linebot import LineBotApi
 from linebot.models import TextSendMessage
+from urllib.parse import urlencode
+from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URL')
@@ -19,6 +21,8 @@ app.config['SECRET_KEY'] = os.getenv('SEACRET_KEY')
 db = SQLAlchemy()
 db.init_app(app)
 migrate = Migrate(app,db)
+with app.app_context():
+    db.create_all()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -26,13 +30,13 @@ login_manager.init_app(app)
 #データベース設計
 class users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_name = db.Column(db.String(30), unique=True)
-    password = db.Column(db.String(255),)
-    line = db.Column(db.String(20), unique=True)
+    user_name = db.Column(db.String(30), nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False)
+    line = db.Column(db.String(33), unique=True)
 
 class memo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False,)
     content = db.Column(db.String(255), nullable=False)
     timer = db.Column(db.DateTime, nullable=False)
 
@@ -52,7 +56,7 @@ def signup():
 
         if password != repassword:
             return "パスワードが一致しません。もう一度入力してください。"
-
+        
         user = users(user_name=user_name, password=generate_password_hash(password))
 
         db.session.add(user)
@@ -114,11 +118,9 @@ def get_countdown_text(timer_time):
     else:
         return f"あと{int(minutes)}分"
 
-
-LINE_CHANNEL_ACCES_TOKEN = os.getenv('MY_CHANNEL_ACCESS_TOKEN')
-line_bot_api = LineBotApi(LINE_CHANNEL_ACCES_TOKEN)
-YOUR_LINE_ID = os.getenv('MY_USER_ID')  
+ 
 @app.route('/memo', methods=['POST'])
+@login_required
 def add_memo():
     content = request.form.get('content')
     JST = timezone(timedelta(hours=9), 'JST')
@@ -128,19 +130,16 @@ def add_memo():
     add_hours = int(input_h)
     add_minutes = int(input_m)
     timer = now_jst + timedelta(hours=add_hours, minutes=add_minutes)
-    new_memo = memo(user_id=current_user.id, content=content, timer=timer)    
+    new_memo = memo(user_id=current_user.id, content=content, timer=timer)
     db.session.add(new_memo)
     db.session.commit()
 
 
-    # 1. ここで計算した変数名は何になっていますか？（例: target_time とか）
     timer_datetime = (now_jst + timedelta(hours=add_hours, minutes=add_minutes)).replace(tzinfo=None)
 
-    # 2. データベース保存
     new_memo = memo(content=content, timer=timer_datetime, user_id=current_user.id)
     db.session.add(new_memo)
     db.session.commit()
-    
 
     try:
         message = f"タイマーをセットしました！\n内容: {content}\n期限: {timer_datetime.strftime('%H:%M')}"
@@ -148,7 +147,120 @@ def add_memo():
     except Exception as e:
         print(f"LINE通知に失敗しました: {e}")
 
+
     return redirect('/')
+
+
+
+
+#LINE連携
+YOUR_LINE_ID = os.getenv('MY_USER_ID')
+LINE_CHANNEL_ID = os.getenv('CHANNEL_ID')
+LINE_CHANNEL_SECRET = os.getenv('MY_CHANNEL_SECRET')
+LINE_CHANNEL_ACCES_TOKEN = os.getenv('CHANNEL_ACCESS_TOKEN')
+line_bot_api = LineBotApi(LINE_CHANNEL_ACCES_TOKEN)
+REDIRECT_URI = 'https://your-domain.com/callback'
+
+
+
+# @app.route('/user/<int:user_id>')
+# @login_required
+# def user_page(user_id):
+#     user = users.query.get_or_404(user_id)
+#     return render_template('user.html', user=user)
+
+
+# @app.route('/line/login/<int:user_id>')
+# @login_required
+# def line_login(user_id):
+#     state = f"{user_id}_{secrets.token_urlsafe(16)}"
+#     session['line_state'] = state
+    
+#     params = {
+#         'response_type': 'code',
+#         'client_id': LINE_CLIENT_ID,
+#         'redirect_uri': REDIRECT_URI,
+#         'state': state,
+#         'scope': 'profile openid',
+#         'bot_prompt': 'aggressive'
+#     }
+
+#     line_url = f"https://access.line.me/oauth2/v2.1/authorize?{urlencode(params)}"
+#     return redirect(line_url)
+
+# @app.route('/callback')
+# @login_required
+# def callback():
+#     code = request.args.get('code')
+#     returned_state = request.args.get('state')
+#     stored_state = session.get('line_state')
+
+#     if not stored_state or returned_state != stored_state:
+#         return "無効なリクエストです（state不一致）", 400
+#     session.pop('line_state', None)
+
+#     token_url = "https://api.line.me/oauth2/v2.1/token"
+#     token_data = {
+#         'grant_type': 'authorization_code',
+#         'code': code,
+#         'redirect_uri': REDIRECT_URI,
+#         'client_id': LINE_CHANNEL_ID,
+#         'client_secret': LINE_CHANNEL_SECRET
+#     }
+#     token_res = requests.post(token_url, data=token_data).json()
+#     line_user_id = token_res.get('userId')
+
+#     if not line_user_id:
+#         return "LINEユーザー情報の取得に失敗しました", 500
+
+#     profile_url = f"https://api.line.me/v2/bot/profile/{line_user_id}"
+#     headers = {"Authorization": f"Bearer {os.getenv('CHANNEL_ACCESS_TOKEN')}"}
+#     profile_res = requests.get(profile_url, headers=headers)
+
+#     if profile_res.status_code == 404:
+#         return "公式LINEを友だち追加してから再度お試しください！", 403
+
+#     app_user_id = int(returned_state.split('_')[0])
+#     user = users.query.get(app_user_id)
+
+#     if user:
+#         user.line = line_user_id
+#         db.session.commit()
+#         return f"連携完了！ユーザーID:{app_user_id}さん、リマインダーを送れるようになりました。"
+#     else:
+#         return "ユーザーが見つかりません", 404
+
+
+# #LINEMessagingAPI,BackgroundScheduler
+# def check_and_send_notifications():
+#     with app.app_context():
+#         now = datetime.now(timezone(timedelta(hours=9)))
+#         memos_to_notify = memo.query.filter(memo.timer <= now).all()
+
+#         for m in memos_to_notify:
+#             try:
+#                 line_bot_api.push_message(users.line, TextSendMessage(text=f"{m.content}"))
+#                 print(f"通知成功: {m.content}")
+                
+#                 db.session.delete(m)
+#                 db.session.commit()
+#                 print(f"削除完了: {m.content}")
+
+#             except Exception as e:
+#                 print(f"自動通知エラー: {e}")
+
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(func=check_and_send_notifications, trigger="interval", minutes=1)
+# scheduler.start()
+
+# #Cron-job.org
+# @app.route('/keep_alive')
+# def keep_alive():
+#     check_and_send_notifications()
+#     return "I'm alive!", 200
+
+
+
 
 #ログアウト機能
 @app.route('/logout')
