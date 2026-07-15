@@ -214,5 +214,14 @@ def logout():
 
 
 
+# worker.py の処理を別スレッドで裏側で起動する関数
+def start_worker():
+    import subprocess
+    import sys
+    # python worker.py をバックグラウンドの別プロセスとして起動します
+    subprocess.Popen([sys.executable, "worker.py"])
+
 if __name__ == "__main__":
+    # ローカル開発環境（python app.py）のときだけ worker も同時に立ち上げる
+    start_worker()
     app.run(debug=True)
