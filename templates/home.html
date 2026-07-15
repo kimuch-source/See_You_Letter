@@ -12,8 +12,9 @@
                 <div class="inner">
                     <ul>
                         <li><a href="/">Home</a></li>
-                        <li><a href="/link">LINE連携</a></li>
-                        <li><a href="#">ログアウト</a></li>
+                        <a href="https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id={{ channel_id }}&redirect_uri={{ redirect_url }}&state={{ random_state }}&scope=openid%20profile"></a>
+                        <li><a href="https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2009911695&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000%2Fcallback&state=asiertu098qewyfoisaaklu8klxjz8&bot_prompt=normal&scope=openid%20profile">LINE連携</a></li>
+                        <!-- <li><a href="#">ログアウト</a></li> -->
                     </ul>
                 </div>
             </nav>
@@ -51,9 +52,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>時間</th>
+                        <th>通知時間</th>
                         <th>内容</th>
-                        <th>編集</th>
+                        <!-- <th>編集</th> -->
                     </tr>
                 </thead>
                 <tbody>
@@ -61,10 +62,10 @@
                         <tr>
                             <td>{{ memo.countdown }}</td>
                             <td>{{ memo.content }}</td>
-                            <td>
+                            <!-- <td>
                                 <button>✏️</button>
                                 <button>🗑️</button>
-                            </td>
+                            </td> -->
                         </tr>
                     {% endfor %}
                 </tbody>
